@@ -1,6 +1,9 @@
+from __future__ import print_function
 import cv2
 import numpy as np
 import os.path # Need this to read from parent directory
+
+print('Using OpenCV {}'.format(cv2.__version__))
 
 # Load an image using 'imread' specifying the path to image
 input = cv2.imread(os.path.dirname(__file__) + '/../images/input.jpg')
