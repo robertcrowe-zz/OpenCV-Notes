@@ -1,9 +1,10 @@
+from __future__ import print_function
 import cv2
 import numpy as np
 import os.path
 
 # Load our image
-image = cv2.imread(os.path.dirname(__file__) + '/../images/bunchofshapes.jpg')
+image = cv2.imread(os.path.dirname(__file__) + '/../../images/bunchofshapes.jpg')
 cv2.imshow('0 - Original Image', image)
 cv2.waitKey(0)
 
@@ -22,7 +23,8 @@ cv2.imshow('1 - Canny Edges', edged)
 cv2.waitKey(0)
 
 # Find contours and print how many were found
-_, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # OCV3 probably doesn't need .copy()
+# Python 3: _, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # OCV3 probably doesn't need .copy()
+contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # OCV3 probably doesn't need .copy()
 print("Number of contours found = ", len(contours))
 
 # Draw all contours (BGR)

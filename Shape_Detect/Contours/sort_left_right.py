@@ -19,7 +19,7 @@ def label_contour_center(image, c):
     return image
 
 # Load our image
-image = cv2.imread(os.path.dirname(__file__) + '/../images/bunchofshapes.jpg')
+image = cv2.imread(os.path.dirname(__file__) + '/../../images/bunchofshapes.jpg')
 orig = image.copy()
 
 # Grayscale our image
@@ -29,7 +29,8 @@ gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 edged = cv2.Canny(gray, 50, 200)
 
 # Find contours and print how many were found
-_, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # OCV3 probably doesn't need .copy()
+# Python 3: _, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # OCV3 probably doesn't need .copy()
+contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # OCV3 probably doesn't need .copy()
 
 # Computer Center of Mass or centroids and draw them on our image
 for (i, c) in enumerate(contours):
