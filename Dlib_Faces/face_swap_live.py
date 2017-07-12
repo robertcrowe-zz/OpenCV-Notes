@@ -79,17 +79,21 @@ cascade = cv2.CascadeClassifier(cascade_path)
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(PREDICTOR_PATH)
 
+# Name is the image we want to swap onto ours
+# dlibOn controls if use dlib's facial landmark detector (better) 
+# or use HAAR Cascade Classifiers (faster)
+filter_image = parentdir + 'images/Trump.jpg' ### Put your image here!
+dlibOn = True
 
 def get_landmarks(im, dlibOn):
-    
-    if (dlibOn == True):
+    '''Use dlib or Haar to generate facial landmarks'''
+    if dlibOn:
         rects = detector(im, 1)
         if len(rects) > 1:
             return "error"
         if len(rects) == 0:
             return "error"
-        return numpy.matrix([[p.x, p.y] for p in predictor(im, rects[0]).parts()])
-    
+        rect = rects[0]
     else:
         rects = cascade.detectMultiScale(im, 1.3,5)
         if len(rects) > 1:
@@ -98,10 +102,11 @@ def get_landmarks(im, dlibOn):
             return "error"
         x,y,w,h =rects[0]
         rect=dlib.rectangle(x,y,x+w,y+h)
-        return numpy.matrix([[p.x, p.y] for p in predictor(im, rect).parts()])
-
     
+    return numpy.matrix([[p.x, p.y] for p in predictor(im, rect).parts()])
+
 def annotate_landmarks(im, landmarks):
+    '''Draw the landmarks.  Not currently used'''
     im = im.copy()
     for idx, point in enumerate(landmarks):
         pos = (point[0, 0], point[0, 1])
@@ -112,13 +117,13 @@ def annotate_landmarks(im, landmarks):
         cv2.circle(im, pos, 3, color=(0, 255, 255))
     return im
 
-
 def draw_convex_hull(im, points, color):
+    '''Draw the face mask, which is a convex hull'''
     points = cv2.convexHull(points)
     cv2.fillConvexPoly(im, points, color=color)
 
-    
 def get_face_mask(im, landmarks):
+    '''Generate the face mask'''
     im = numpy.zeros(im.shape[:2], dtype=numpy.float64)
 
     for group in OVERLAY_POINTS:
@@ -135,11 +140,10 @@ def get_face_mask(im, landmarks):
     
     
 def transformation_from_points(points1, points2):
-    """
-    Return an affine transformation [s * R | T] such that:
+    '''Return an affine transformation [s * R | T] such that:
         sum ||s*R*p1,i + T - p2,i||^2
     is minimized.
-    """
+    '''
     # Solve the procrustes problem by subtracting centroids, scaling by the
     # standard deviation, and then using the SVD to calculate the rotation. See
     # the following for more details:
@@ -170,8 +174,8 @@ def transformation_from_points(points1, points2):
                                        c2.T - (s2 / s1) * R * c1.T)),
                          numpy.matrix([0., 0., 1.])])
 
-
 def read_im_and_landmarks(fname):
+    '''Get the resized image and the landmarks'''
     im = cv2.imread(fname, cv2.IMREAD_COLOR)
     im = cv2.resize(im,None,fx=0.35, fy=0.35, interpolation = cv2.INTER_LINEAR)
     im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
@@ -180,8 +184,8 @@ def read_im_and_landmarks(fname):
 
     return im, s
 
-
 def warp_im(im, M, dshape):
+    '''Warp speed!'''
     output_im = numpy.zeros(dshape, dtype=im.dtype)
     cv2.warpAffine(im,
                    M[:2],
@@ -191,8 +195,8 @@ def warp_im(im, M, dshape):
                    flags=cv2.WARP_INVERSE_MAP)
     return output_im
 
-
 def correct_colours(im1, im2, landmarks1):
+    '''Get the colors of the original image for blending with the mask'''
     blur_amount = COLOUR_CORRECT_BLUR_FRAC * numpy.linalg.norm(
                               numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
                               numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
@@ -209,7 +213,7 @@ def correct_colours(im1, im2, landmarks1):
                                                 im2_blur.astype(numpy.float64))
 
 def face_swap(img,name):
-
+    '''Swap faces with Trump'''
     s = get_landmarks(img,True)
     
     if type(s) is str and s == "error":
@@ -246,15 +250,8 @@ def face_swap(img,name):
 
 cap = cv2.VideoCapture(0)
 
-
-# Name is the image we want to swap onto ours
-# dlibOn controls if use dlib's facial landmark detector (better) 
-# or use HAAR Cascade Classifiers (faster)
-
-filter_image = parentdir + 'images/Trump.jpg' ### Put your image here!
-dlibOn = False
-
-while True:   
+while True:
+    '''Review your current appearance for reference'''
     ret, frame = cap.read()   
     
     #Reduce image size by 75% to reduce processing time and improve framerates
@@ -263,12 +260,13 @@ while True:
     # flip image so that it's more mirror like
     frame = cv2.flip(frame, 1)
 
-    cv2.imshow('Our Amazing Face Swapper', frame)
+    cv2.imshow('Press Enter to continue', frame)
         
     if cv2.waitKey(1) == 13: #13 is the Enter Key
         break
 
-while True:   
+while True:
+    '''Become possessed by Trump'''
     ret, frame = cap.read()   
     
     #Reduce image size by 75% to reduce processing time and improve framerates
@@ -277,7 +275,7 @@ while True:
     # flip image so that it's more mirror like
     frame = cv2.flip(frame, 1)
     
-    cv2.imshow('Our Amazing Face Swapper', face_swap(frame, filter_image))
+    cv2.imshow('Press Enter to continue', face_swap(frame, filter_image))
     
     if cv2.waitKey(1) == 13: #13 is the Enter Key
         break
