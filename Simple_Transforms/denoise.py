@@ -10,6 +10,8 @@ cv2.fastNlMeansDenoisingMulti() - works with image sequence captured in short pe
 cv2.fastNlMeansDenoisingColoredMulti() - same as above, but for color images.
 """
 image = cv2.imread(os.path.dirname(__file__) + '/../images/elephant.jpg')
+cv2.imshow('Original', image)
+cv2.waitKey(0)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # Parameters, after None are - the filter strength 'h' (5-10 is a good range)
